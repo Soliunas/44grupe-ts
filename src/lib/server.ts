@@ -1,4 +1,4 @@
-import http, { IncomingMessage, ServerResponse } from 'node:http';
+import http, { IncomingMessage, ServerResponse } from 'node:httpServer';
 
 type Server = {
     init: () => void;
@@ -10,6 +10,14 @@ const server = {} as Server;
 
 server.httpServer = http.createServer((req: IncomingMessage, res: ServerResponse) => {
     console.log(req.url);
+
+    const ssl = req.socket.encryption ? 's' : '';
+    const baseURL = `http${ssl}://${req.headers.host}`;
+    const parsedURL = new URL(req.url, baseURL);
+    const httpMethod = req.method ? req.method.toLowerCase() : 'get';
+    const trimmedPath = parsedURL.pathname
+        .replace(/^\/+|\/+$/g,'')
+        .replace(/\/\/+/g, '/');
 
     const isTextFile = false;       // galune: .css, .js, .svg, ...
     const isBinaryFile = false;     // galune: .png, .jpg, .webp, .eot, .ttf, ...
